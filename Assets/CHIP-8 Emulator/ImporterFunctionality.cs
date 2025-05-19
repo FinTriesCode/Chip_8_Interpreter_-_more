@@ -28,6 +28,10 @@ namespace CHIP_8_Emulator
         [Tooltip("Delay Timer")] private static byte delayTimer;
         [Tooltip("Sound Timer")] private static float soundTimer;
 
+        [Header("Display")] [Tooltip("GFX")] private static byte[] vram = new byte[64 * 32];
+        
+        
+        
         private bool waitingforKeypress;
         private int waitingRegister;
         
@@ -84,6 +88,7 @@ namespace CHIP_8_Emulator
                     else if (byteTwo == 0xE0 && byteOne == 0x00)
                     {
                         //call 00E0 opcode
+                        ClearDisplay();
                         Debug.Log("opcode 00E0 found.");
                     }
 
@@ -187,8 +192,8 @@ namespace CHIP_8_Emulator
                 case 0x0D:
                     Debug.Log("opcode DXYN found.");
                     //call method
-                    
-                    //TODO
+
+                    Draw(byteOneNibbleTwo, byteTwoNibbleOne, byteTwoNibbleTwo);
                     break;
 
                 case 0x0E:
@@ -383,6 +388,35 @@ namespace CHIP_8_Emulator
         {
             PC += 4;
         }
+
+        private static void ClearDisplay()
+        {
+            for (var i = 0; i < vram.Length; i++) vram[i] = 0;
+        }
+
+        private static void Draw(byte Vx, byte Vy, byte n) //spriteWidth is 8 pixels
+        {
+            byte x = V[Vx];
+            byte y = V[Vy];
+
+            for (int yOffset = 0; yOffset < n; yOffset++)
+            {
+                var sprite = ram[I + yOffset];
+                
+                for (int xOffset = 0; xOffset < 8; xOffset++)
+                {
+                    var mask = 0x1 << xOffset;
+                }
+            }
+        }
         
     }
 }
+
+// 00010000
+// 00000010
+
+
+// 00000000
+// 00000000
+// 00000000
