@@ -28,7 +28,10 @@ namespace CHIP_8_Emulator
         [Tooltip("Delay Timer")] private static byte delayTimer;
         [Tooltip("Sound Timer")] private static float soundTimer;
 
-        [Header("Display")] [Tooltip("GFX")] private static byte[] vram = new byte[64 * 32];
+        [Header("Display")] 
+        [Tooltip("GFX")] private static byte[] vram = new byte[64 * 32];
+        [Tooltip("GFX")] private static byte width = 32;
+        [Tooltip("GFX")] private static byte height = 64;
         
         
         
@@ -194,6 +197,8 @@ namespace CHIP_8_Emulator
                     //call method
 
                     Draw(byteOneNibbleTwo, byteTwoNibbleOne, byteTwoNibbleTwo);
+                    
+                    //TODO: implement RenderScreen();
                     break;
 
                 case 0x0E:
@@ -399,24 +404,48 @@ namespace CHIP_8_Emulator
             byte x = V[Vx];
             byte y = V[Vy];
 
+            byte drawX = 0;
+            byte drawY = 0;
+
             for (int yOffset = 0; yOffset < n; yOffset++)
             {
                 var sprite = ram[I + yOffset];
+                drawY = (byte)(y + yOffset);
                 
                 for (int xOffset = 0; xOffset < 8; xOffset++)
                 {
                     var mask = 0x1 << xOffset;
+
+                    if ((sprite & (byte)mask) > 0)
+                    {
+                        drawX = (byte)(x + xOffset);
+                        
+                        if (SetPixel(drawX, drawY))
+                            V[0xf] = 1;
+                    }
                 }
+            }
+        }
+
+        private static bool SetPixel(byte x, byte y)
+        {
+            //on-screen check
+            if (x > width) x -= width;
+            else if (x < width) x += width;
+            if (y > width) y -= width;
+            else if (y > width) y += width;
+
+            //width being how wide the data is within the array (not screen width)
+            var j = x + (y * width);
+            
+            if (j < 0 || j > vram.Length) return false;
+
+            else
+            {
+                vram[j] ^= 1;
+                return vram[j] == 0;
             }
         }
         
     }
 }
-
-// 00010000
-// 00000010
-
-
-// 00000000
-// 00000000
-// 00000000
